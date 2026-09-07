@@ -29,10 +29,20 @@ export function useProfile() {
 
     // Live subscription — updates automatically when the profile changes
     // (e.g. right after onboarding writes `onboarded: true`).
-    const unsubscribe = onSnapshot(doc(db, "users", user.uid), (snap) => {
-      setProfile(snap.exists() ? (snap.data() as UserProfile) : null);
-      setLoading(false);
-    });
+    // The error callback is critical: without it, a rules failure would
+    // leave `loading` stuck on true and block the onboarding redirect.
+    const unsubscribe = onSnapshot(
+      doc(db, "users", user.uid),
+      (snap) => {
+        setProfile(snap.exists() ? (snap.data() as UserProfile) : null);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("[useProfile] Snapshot failed:", err);
+        setProfile(null);
+        setLoading(false);
+      }
+    );
 
     return unsubscribe;
   }, [user, authLoading]);
