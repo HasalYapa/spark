@@ -130,9 +130,12 @@ function OnboardingFlow() {
         files.map((f) => uploadProfilePhoto(user.uid, f))
       );
       setPhotos((prev) => [...prev, ...urls]);
-    } catch {
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? "";
       setError(
-        "Photo upload failed. Make sure Storage rules allow signed-in writes, then retry."
+        code === "storage/unauthorized"
+          ? "Upload blocked: Storage rules deny this user. Publish the Storage rules in Firebase Console, then retry."
+          : `Photo upload failed (${code || "network"}). Try a smaller photo or check your connection.`
       );
     } finally {
       setUploading(false);
