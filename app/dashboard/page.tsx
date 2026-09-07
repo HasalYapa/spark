@@ -29,9 +29,9 @@ function DashboardContent() {
   const { profile, loading } = useProfile();
   const router = useRouter();
 
-  // Incomplete profile? Send them to onboarding first.
+  // Incomplete (or missing) profile? Send them to onboarding first.
   useEffect(() => {
-    if (!loading && profile && !profile.onboarded) {
+    if (!loading && (!profile || !profile.onboarded)) {
       router.replace("/onboarding");
     }
   }, [profile, loading, router]);
