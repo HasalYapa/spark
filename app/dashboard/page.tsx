@@ -3,15 +3,17 @@
 /**
  * app/dashboard/page.tsx
  * ----------------------
- * Protected placeholder page proving the auth guard works. Wrapped in
- * <ProtectedRoute>: unauthenticated visitors are bounced to /login, and
- * signed-in users see a minimal shell that the swipe deck, chat list,
- * and onboarding will plug into in upcoming tasks.
+ * Protected home shell. Unauthenticated visitors are bounced to /login;
+ * authenticated users whose profile isn't onboarded are redirected to
+ * /onboarding. The swipe deck and chat list will plug in here next.
  */
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Heart, LogOut } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
+import { useProfile } from "@/lib/useProfile";
 import { logout } from "@/lib/auth";
 
 export default function DashboardPage() {
@@ -24,6 +26,15 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const { user } = useAuth();
+  const { profile, loading } = useProfile();
+  const router = useRouter();
+
+  // Incomplete profile? Send them to onboarding first.
+  useEffect(() => {
+    if (!loading && profile && !profile.onboarded) {
+      router.replace("/onboarding");
+    }
+  }, [profile, loading, router]);
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-b from-rose-50 to-white">
@@ -50,7 +61,7 @@ function DashboardContent() {
           <span className="font-medium text-rose-500">
             {user?.email ?? "unknown"}
           </span>
-          . The swipe deck, onboarding and chat will live here.
+          . The swipe deck and chat list will live here.
         </p>
       </div>
     </main>
