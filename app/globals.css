@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Tailwind v4 theme tokens — a warm "dating" palette built on rose. */
+@theme inline {
+  --color-primary: #f43f5e; /* rose-500   */
+  --color-primary-dark: #e11d48; /* rose-600   */
+  --font-sans: var(--font-geist-sans);
+}
+
+html,
+body {
+  height: 100%;
+}
