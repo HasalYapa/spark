@@ -4,8 +4,17 @@
  * Helpers for Firebase Storage — profile photo uploads.
  */
 
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { storage } from "./firebase";
+/**
+ * lib/storage.ts — profile photo uploads via Cloudinary (free tier).
+ *
+ * Uses an UNSIGNED upload preset, so no API secret lives in the app.
+ * Required env vars (.env.local):
+ *   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME      — e.g. zszxrxjr
+ *   NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET   — unsigned preset name
+ */
+
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 /**
  * Downscales and re-compresses an image in the browser before upload.
@@ -48,19 +57,43 @@ async function compressImage(
 }
 
 /**
- * Uploads a single profile photo for a user and returns its public
- * download URL. Files are namespaced under users/{uid}/photos/ so that
- * storage rules can be scoped per-user.
+ * Uploads a single profile photo and returns its secure CDN URL.
+ * Photos are stored under spark/{uid}/ in the Cloudinary account.
  */
 export async function uploadProfilePhoto(
   uid: string,
   file: File
 ): Promise<string> {
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-  const path = `users/${uid}/photos/${Date.now()}-${safeName}.jpg`;
-  const photoRef = ref(storage, path);
+  if (!CLOUD_NAME || !UPLOAD_PRESET) {
+    throw Object.assign(
+      new Error("Cloudinary is not configured"),
+      { code: "config/missing" }
+    );
+  }
 
   const blob = await compressImage(file);
-  await uploadBytes(photoRef, blob, { contentType: "image/jpeg" });
-  return getDownloadURL(photoRef);
+
+  const form = new FormData();
+  form.append("file", blob, "photo.jpg");
+  form.append("upload_preset", UPLOAD_PRESET);
+  form.append("folder", `spark/${uid}`);
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+    { method: "POST", body: form }
+  );
+
+  if (!res.ok) {
+    let message = `upload-failed-${res.status}`;
+    try {
+      const err = await res.json();
+      message = err?.error?.message ?? message;
+    } catch {
+      /* keep default */
+    }
+    throw Object.assign(new Error(message), { code: `cloudinary/${res.status}` });
+  }
+
+  const data = await res.json();
+  return data.secure_url as string;
 }

@@ -1,0 +1,55 @@
+[debug] [2026-09-07T17:38:45.941Z] ----------------------------------------------------------------------
+[debug] [2026-09-07T17:38:45.972Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\diman\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js login --project spark-75503
+[debug] [2026-09-07T17:38:45.972Z] CLI Version:   15.29.0
+[debug] [2026-09-07T17:38:45.973Z] Platform:      win32
+[debug] [2026-09-07T17:38:45.973Z] Node Version:  v24.18.0
+[debug] [2026-09-07T17:38:45.973Z] Detected Agent: unknown
+[debug] [2026-09-07T17:38:45.974Z] Time:          Mon Sep 07 2026 23:08:45 GMT+0530 (India Standard Time)
+[debug] [2026-09-07T17:38:45.974Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-09-07T17:38:46.030Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[info] i  The Firebase CLI’s MCP server feature can optionally make use of Gemini in Firebase. Learn more about Gemini in Firebase and how it uses your data: https://firebase.google.com/docs/gemini-in-firebase#how-gemini-in-firebase-uses-your-data 
+[debug] [2026-09-07T17:38:48.289Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-09-07T17:38:48.289Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-09-07T17:39:18.441Z] ----------------------------------------------------------------------
+[debug] [2026-09-07T17:39:18.446Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\diman\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js login --project spark-75503
+[debug] [2026-09-07T17:39:18.446Z] CLI Version:   15.29.0
+[debug] [2026-09-07T17:39:18.447Z] Platform:      win32
+[debug] [2026-09-07T17:39:18.447Z] Node Version:  v24.18.0
+[debug] [2026-09-07T17:39:18.447Z] Detected Agent: unknown
+[debug] [2026-09-07T17:39:18.447Z] Time:          Mon Sep 07 2026 23:09:18 GMT+0530 (India Standard Time)
+[debug] [2026-09-07T17:39:18.447Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-09-07T17:39:18.487Z] >>> [apiv2][query] POST https://auth.firebase.tools/attest [none]
+[debug] [2026-09-07T17:39:18.487Z] >>> [apiv2][body] POST https://auth.firebase.tools/attest {"session_id":"5c3072fd-90eb-474b-aca8-40a1b87b3381"}
+[debug] [2026-09-07T17:39:19.440Z] <<< [apiv2][status] POST https://auth.firebase.tools/attest 200
+[debug] [2026-09-07T17:42:35.595Z] ----------------------------------------------------------------------
+[debug] [2026-09-07T17:42:35.621Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\diman\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js login 4/0ATsMZqBZPboWOr-MR95a0t4gYpy4-D28x0QOiLjy1QvE87wVsbxIa5TL590zPGMd3H8VKg
+[debug] [2026-09-07T17:42:35.622Z] CLI Version:   15.29.0
+[debug] [2026-09-07T17:42:35.622Z] Platform:      win32
+[debug] [2026-09-07T17:42:35.623Z] Node Version:  v24.18.0
+[debug] [2026-09-07T17:42:35.623Z] Detected Agent: unknown
+[debug] [2026-09-07T17:42:35.624Z] Time:          Mon Sep 07 2026 23:12:35 GMT+0530 (India Standard Time)
+[debug] [2026-09-07T17:42:35.624Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-09-07T17:42:35.704Z] >>> [apiv2][query] POST https://accounts.google.com/o/oauth2/token [none]
+[debug] [2026-09-07T17:42:35.705Z] >>> [apiv2][body] POST https://accounts.google.com/o/oauth2/token [omitted]
+[debug] [2026-09-07T17:42:36.265Z] <<< [apiv2][status] POST https://accounts.google.com/o/oauth2/token 200
+[debug] [2026-09-07T17:44:44.616Z] ----------------------------------------------------------------------
+[debug] [2026-09-07T17:44:45.041Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\diman\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js login:ci
+[debug] [2026-09-07T17:44:45.042Z] CLI Version:   15.29.0
+[debug] [2026-09-07T17:44:45.042Z] Platform:      win32
+[debug] [2026-09-07T17:44:45.042Z] Node Version:  v24.18.0
+[debug] [2026-09-07T17:44:45.043Z] Detected Agent: unknown
+[debug] [2026-09-07T17:44:45.043Z] Time:          Mon Sep 07 2026 23:14:45 GMT+0530 (India Standard Time)
+[debug] [2026-09-07T17:44:45.043Z] ----------------------------------------------------------------------
+[debug] 
+[warn] !  Authenticating with a `login:ci` token is deprecated and will be removed in a future major version of `firebase-tools`. Instead, use a service account key with `GOOGLE_APPLICATION_CREDENTIALS`: https://cloud.google.com/docs/authentication/getting-started 
+[info] 
+[info] Visit this URL on this device to log in:
+[info] https://accounts.google.com/o/oauth2/auth?client_id=563584335869-fgrhgmd47bqnekij5i8b5pr03ho849e6.apps.googleusercontent.com&scope=email%20openid%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloudplatformprojects.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Ffirebase%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcloud-platform&response_type=code&state=210588465&redirect_uri=http%3A%2F%2Flocalhost%3A9005
+[info] 
+[info] Waiting for authentication...
+[debug] [2026-09-07T17:45:01.718Z] >>> [apiv2][query] POST https://accounts.google.com/o/oauth2/token [none]
+[debug] [2026-09-07T17:45:01.719Z] >>> [apiv2][body] POST https://accounts.google.com/o/oauth2/token [omitted]
+[debug] [2026-09-07T17:45:02.208Z] <<< [apiv2][status] POST https://accounts.google.com/o/oauth2/token 200

@@ -34,3 +34,6 @@ next-env.d.ts
 # local logs
 dev-out.txt
 dev-err.txt
+
+# cli logs (may contain tokens)
+fb*.txt
