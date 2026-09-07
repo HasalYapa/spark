@@ -12,6 +12,31 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { loginWithGoogle } from "@/lib/auth";
 
+/**
+ * Maps Firebase auth error codes to helpful, human-readable messages.
+ * The raw error code is appended in small text for debugging.
+ */
+function friendlyGoogleError(code: string, raw: string): string {
+  switch (code) {
+    case "auth/unauthorized-domain":
+      return "This domain is not authorized in Firebase. (Console → Authentication → Settings → Authorized domains)";
+    case "auth/operation-not-allowed":
+      return "Google sign-in is not enabled yet. (Console → Authentication → Sign-in method → enable Google)";
+    case "auth/popup-blocked":
+      return "Your browser blocked the sign-in popup. Please allow popups for this site and retry.";
+    case "auth/popup-closed-by-user":
+      return "The Google popup was closed before finishing. Please try again.";
+    case "auth/cancelled-popup-request":
+      return "Another sign-in popup is already open. Close it and try again.";
+    case "auth/network-request-failed":
+      return "Network error — check your internet connection and retry.";
+    case "auth/configuration-not-found":
+      return "Auth configuration missing — make sure Authentication is enabled in the Firebase project.";
+    default:
+      return `Google sign-in failed (${code}). ${raw.slice(0, 120)}`;
+  }
+}
+
 /** Minimal inline Google logo (keeps the bundle free of extra assets). */
 function GoogleIcon() {
   return (
@@ -47,8 +72,10 @@ export default function GoogleButton() {
     try {
       await loginWithGoogle();
       router.push("/dashboard"); // auth guard will reroute to onboarding later
-    } catch {
-      setError("Could not sign in with Google. Please try again.");
+    } catch (err) {
+      // Surface Firebase's own error code so failures are diagnosable.
+      const code = (err as { code?: string }).code ?? "unknown-error";
+      setError(friendlyGoogleError(code, String(err)));
       setLoading(false);
     }
   }
