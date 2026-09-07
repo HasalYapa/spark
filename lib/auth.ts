@@ -65,23 +65,29 @@ export async function loginWithGoogle() {
   const { user } = await signInWithPopup(auth, provider);
 
   // Google users skip registerWithEmail, so seed their profile doc if new.
-  await setDoc(
-    doc(db, "users", user.uid),
-    {
-      uid: user.uid,
-      name: user.displayName ?? "",
-      email: user.email,
-      age: null,
-      gender: null,
-      bio: "",
-      photos: [],
-      location: null,
-      preferences: { gender: "everyone", minAge: 18, maxAge: 99 },
-      onboarded: false,
-      createdAt: Date.now(),
-    },
-    { merge: true } // merge so we never overwrite an existing profile
-  );
+  // NOTE: we intentionally don't fail the sign-in if this write is blocked
+  // by Firestore rules — the dashboard/onboarding will surface it instead.
+  try {
+    await setDoc(
+      doc(db, "users", user.uid),
+      {
+        uid: user.uid,
+        name: user.displayName ?? "",
+        email: user.email,
+        age: null,
+        gender: null,
+        bio: "",
+        photos: [],
+        location: null,
+        preferences: { gender: "everyone", minAge: 18, maxAge: 99 },
+        onboarded: false,
+        createdAt: Date.now(),
+      },
+      { merge: true } // merge so we never overwrite an existing profile
+    );
+  } catch (err) {
+    console.warn("[auth] Profile seeding skipped:", err);
+  }
 
   return user;
 }
