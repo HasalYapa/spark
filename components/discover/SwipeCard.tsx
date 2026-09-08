@@ -8,12 +8,12 @@
  */
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Heart, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Heart, Star, X } from "lucide-react";
 import type { UserProfile } from "@/lib/types";
 
 interface SwipeCardProps {
   profile: UserProfile;
-  onDecide: (direction: "like" | "pass") => void;
+  onDecide: (direction: "like" | "superlike" | "pass") => void;
   busy: boolean;
 }
 
@@ -106,8 +106,8 @@ export default function SwipeCard({
         </div>
       </div>
 
-      {/* Action buttons */}
-      <div className="absolute -bottom-7 inset-x-0 flex justify-center gap-8">
+      {/* Action buttons — Pass / Super Like / Like (Tinder style) */}
+      <div className="absolute -bottom-7 inset-x-0 flex justify-center gap-6">
         <button
           onClick={() => onDecide("pass")}
           disabled={busy}
@@ -115,6 +115,15 @@ export default function SwipeCard({
           className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-gray-400 shadow-lg transition hover:bg-gray-50 hover:text-red-400 active:scale-90 disabled:opacity-50"
         >
           <X className="h-8 w-8" />
+        </button>
+        <button
+          onClick={() => onDecide("superlike")}
+          disabled={busy}
+          aria-label="Super Like"
+          title="Super Like ⭐"
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-sky-400 shadow-lg shadow-sky-200 transition hover:bg-sky-50 hover:text-sky-500 active:scale-90 disabled:opacity-50"
+        >
+          <Star className="h-7 w-7 fill-current" />
         </button>
         <button
           onClick={() => onDecide("like")}

@@ -9,17 +9,26 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, MessageCircleHeart } from "lucide-react";
+import { Loader2, MessageCircleHeart, Star } from "lucide-react";
 import BottomNav from "@/components/BottomNav";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useProfile } from "@/lib/useProfile";
-import { fetchMatches, fetchUserProfile } from "@/lib/matching";
+import {
+  fetchLikesYou,
+  fetchMatches,
+  fetchUserProfile,
+} from "@/lib/matching";
 import type { UserProfile } from "@/lib/types";
 
 interface MatchRow {
   matchId: string;
   profile: UserProfile | null;
+}
+
+interface LikeYouRow {
+  profile: UserProfile;
+  superLike: boolean;
 }
 
 export default function MatchesPage() {
@@ -35,6 +44,7 @@ function MatchesContent() {
   const { user } = useAuth();
   const { profile, loading: profileLoading } = useProfile();
   const [rows, setRows] = useState<MatchRow[] | null>(null);
+  const [likesYou, setLikesYou] = useState<LikeYouRow[] | null>(null);
 
   useEffect(() => {
     if (!profileLoading && (!profile || !profile.onboarded)) {
@@ -53,6 +63,17 @@ function MatchesContent() {
         }))
       );
       setRows(withProfiles);
+      // Fire and forget — "Likes You" strip (Tinder Gold style).
+      fetchLikesYou(user.uid)
+        .then((rows) =>
+          setLikesYou(
+            rows.map((r) => ({
+              profile: r.profile,
+              superLike: r.superLike,
+            }))
+          )
+        )
+        .catch(() => setLikesYou([]));
     })();
   }, [user, profile?.onboarded]);
 
@@ -63,6 +84,44 @@ function MatchesContent() {
       </header>
 
       <div className="mx-auto w-full max-w-md px-5">
+        {/* "Likes You" strip */}
+        {likesYou !== null && likesYou.length > 0 && (
+          <section className="mb-6">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-gray-400">
+              Likes you ⭐
+            </h2>
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {likesYou.map(({ profile: p, superLike }) => (
+                <div
+                  key={p.uid}
+                  className="relative h-28 w-22 shrink-0 overflow-hidden rounded-2xl bg-rose-100 shadow-sm"
+                >
+                  {p.photos?.[0] ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                      src={p.photos[0]}
+                      alt={p.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-2xl font-bold text-rose-500">
+                      {p.name.charAt(0)}
+                    </span>
+                  )}
+                  {superLike && (
+                    <span className="absolute top-1.5 left-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-sky-500 text-white shadow">
+                      <Star className="h-3.5 w-3.5 fill-current" />
+                    </span>
+                  )}
+                  <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 pb-1 pt-4 text-xs font-semibold text-white">
+                    {p.name}, {p.age}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {rows === null ? (
           <div className="flex h-[60vh] items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-rose-400" />

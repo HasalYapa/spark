@@ -31,6 +31,27 @@ export interface UserProfile {
   createdAt: number;
 }
 
+/** Firestore `notifications/{autoId}` shape. */
+export type NotificationType = "like" | "superlike" | "match";
+
+export interface AppNotification {
+  id: string;
+  to: string;
+  fromUid: string;
+  type: NotificationType;
+  read: boolean;
+  createdAt: number;
+}
+
+/** Firestore `likes/{fromUid_toUid}` shape. */
+export interface LikeDoc {
+  from: string;
+  to: string;
+  /** True when the like was a Super Like. */
+  super?: boolean;
+  createdAt: number;
+}
+
 /** Firestore `matches/{matchId}` document shape (used in later tasks). */
 export interface Match {
   matchId: string;

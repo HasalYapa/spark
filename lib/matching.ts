@@ -21,9 +21,10 @@ import {
   where,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import type { UserProfile } from "./types";
+import type { UserProfile, LikeDoc } from "./types";
+import { createNotification } from "./notifications";
 
-export type SwipeDirection = "like" | "pass";
+export type SwipeDirection = "like" | "superlike" | "pass";
 
 function pairId(from: string, to: string) {
   return `${from}_${to}`;
@@ -43,14 +44,19 @@ export async function swipe(
   targetUid: string,
   direction: SwipeDirection
 ): Promise<{ matchId: string | null }> {
-  const col = direction === "like" ? "likes" : "passed";
+  const isSuper = direction === "superlike";
+  const col = direction === "pass" ? "passed" : "likes";
   await setDoc(doc(db, col, pairId(meUid, targetUid)), {
     from: meUid,
     to: targetUid,
+    ...(direction !== "pass" ? { super: isSuper } : {}),
     createdAt: Date.now(),
   });
 
-  if (direction !== "like") return { matchId: null };
+  if (direction === "pass") return { matchId: null };
+
+  // Let the target know they were liked / super liked.
+  await createNotification(targetUid, meUid, isSuper ? "superlike" : "like");
 
   // Did the target already like me?
   const reciprocal = await getDoc(doc(db, "likes", pairId(targetUid, meUid)));
@@ -64,6 +70,11 @@ export async function swipe(
     { users: [a, b], createdAt: Date.now(), lastMessageAt: Date.now() },
     { merge: true }
   );
+  // Notify both sides about the new match.
+  await Promise.all([
+    createNotification(targetUid, meUid, "match"),
+    createNotification(meUid, targetUid, "match"),
+  ]);
   return { matchId: matchRef.id };
 }
 
@@ -129,4 +140,39 @@ export async function fetchMatches(meUid: string) {
 export async function fetchUserProfile(uid: string): Promise<UserProfile | null> {
   const snap = await getDoc(doc(db, "users", uid));
   return snap.exists() ? (snap.data() as UserProfile) : null;
+}
+
+/**
+ * "Likes You" — profiles who liked (or super liked) me but I haven't
+ * swiped on yet. Returns [{ profile, super }] rows, newest first.
+ */
+export async function fetchLikesYou(meUid: string): Promise<
+  { profile: UserProfile; superLike: boolean; likedAt: number }[]
+> {
+  const [received, liked, passed] = await Promise.all([
+    getDocs(query(collection(db, "likes"), where("to", "==", meUid))),
+    getDocs(query(collection(db, "likes"), where("from", "==", meUid))),
+    getDocs(query(collection(db, "passed"), where("from", "==", meUid))),
+  ]);
+
+  const alreadySwiped = new Set<string>([
+    ...liked.docs.map((d) => d.data().to as string),
+    ...passed.docs.map((d) => d.data().to as string),
+  ]);
+
+  const rows = received.docs
+    .map((d) => d.data() as LikeDoc)
+    .filter((l) => !alreadySwiped.has(l.from))
+    .sort((a, b) => b.createdAt - a.createdAt);
+
+  const out: { profile: UserProfile; superLike: boolean; likedAt: number }[] = [];
+  await Promise.all(
+    rows.map(async (l) => {
+      const profile = await fetchUserProfile(l.from);
+      if (profile) {
+        out.push({ profile, superLike: !!l.super, likedAt: l.createdAt });
+      }
+    })
+  );
+  return out.sort((a, b) => b.likedAt - a.likedAt);
 }

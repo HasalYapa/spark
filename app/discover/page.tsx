@@ -36,6 +36,8 @@ function DiscoverContent() {
   const [candidates, setCandidates] = useState<UserProfile[]>([]);
   const [deckLoading, setDeckLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [match, setMatch] = useState<{ other: UserProfile; id: string } | null>(
     null
   );
@@ -59,18 +61,35 @@ function DiscoverContent() {
     if (profile?.onboarded) loadDeck();
   }, [profile, loading, router, loadDeck]);
 
-  async function handleDecide(direction: "like" | "pass") {
+  async function handleDecide(direction: "like" | "superlike" | "pass") {
     if (!profile || !candidates.length || busy) return;
     const target = candidates[0];
     setBusy(true);
+    setError(null);
     try {
       const { matchId } = await swipe(profile.uid, target.uid, direction);
       setCandidates((prev) => prev.slice(1));
       if (matchId) {
         setMatch({ other: target, id: matchId });
+      } else if (direction === "like") {
+        // No mutual like yet — tell the user what happens next.
+        setToast(
+          `You liked ${target.name}! 💛 You'll be able to chat when they like you back.`
+        );
+        setTimeout(() => setToast(null), 3500);
+      } else if (direction === "superlike") {
+        setToast(
+          `Super Liked ${target.name}! ⭐ They'll see it instantly and can match right away.`
+        );
+        setTimeout(() => setToast(null), 3500);
       }
-    } catch {
-      alert("Something went wrong. Please try again.");
+    } catch (err) {
+      const code = (err as { code?: string }).code ?? "";
+      setError(
+        code.includes("permission")
+          ? "Write blocked by Firestore rules. Check the rules in Firebase Console."
+          : "Something went wrong while swiping. Please try again."
+      );
     } finally {
       setBusy(false);
     }
@@ -127,6 +146,24 @@ function DiscoverContent() {
           </div>
         )}
       </div>
+
+      {/* Toast feedback after a like */}
+      {toast && (
+        <div className="fixed inset-x-0 top-6 z-50 mx-auto max-w-sm px-4">
+          <div className="rounded-xl bg-gray-900/90 px-4 py-3 text-center text-sm text-white shadow-lg">
+            {toast}
+          </div>
+        </div>
+      )}
+
+      {/* Error banner */}
+      {error && (
+        <div className="mx-auto mt-3 max-w-sm px-5">
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-500">
+            {error}
+          </p>
+        </div>
+      )}
 
       {/* Match celebration */}
       {match && profile && (
