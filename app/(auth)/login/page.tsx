@@ -29,7 +29,9 @@ export default function LoginPage() {
     setError(null);
     try {
       await loginWithEmail(email.trim(), password);
-      router.push("/dashboard");
+      // Onboarded users land straight on the swipe deck; the guards in
+      // discover/dashboard still reroute unfinished profiles to onboarding.
+      router.push("/discover");
     } catch {
       setError("Invalid email or password. Please try again.");
       setLoading(false);

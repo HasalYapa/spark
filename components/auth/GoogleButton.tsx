@@ -71,7 +71,9 @@ export default function GoogleButton() {
     setError(null);
     try {
       await loginWithGoogle();
-      router.push("/dashboard"); // auth guard will reroute to onboarding later
+      // Onboarded users land straight on the swipe deck; the guards in
+      // discover/dashboard still reroute unfinished profiles to onboarding.
+      router.push("/discover");
     } catch (err) {
       // Surface Firebase's own error code so failures are diagnosable.
       const code = (err as { code?: string }).code ?? "unknown-error";

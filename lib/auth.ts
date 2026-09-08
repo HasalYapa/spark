@@ -14,7 +14,7 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
 /** Signs in with an email/password pair. */
@@ -68,9 +68,12 @@ export async function loginWithGoogle() {
   // NOTE: we intentionally don't fail the sign-in if this write is blocked
   // by Firestore rules — the dashboard/onboarding will surface it instead.
   try {
-    await setDoc(
-      doc(db, "users", user.uid),
-      {
+    const userRef = doc(db, "users", user.uid);
+    const existing = await getDoc(userRef);
+
+    if (!existing.exists()) {
+      // Brand-new Google user — create the seed profile.
+      await setDoc(userRef, {
         uid: user.uid,
         name: user.displayName ?? "",
         email: user.email,
@@ -82,9 +85,9 @@ export async function loginWithGoogle() {
         preferences: { gender: "everyone", minAge: 18, maxAge: 99 },
         onboarded: false,
         createdAt: Date.now(),
-      },
-      { merge: true } // merge so we never overwrite an existing profile
-    );
+      });
+    }
+    // Existing user: touch nothing — their onboarded state and data stay.
   } catch (err) {
     console.warn("[auth] Profile seeding skipped:", err);
   }
