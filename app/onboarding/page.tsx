@@ -9,7 +9,7 @@
  *   Step 3 — Profile photos (upload to Firebase Storage)
  *
  * On finish, the `users/{uid}` document is updated with `onboarded: true`
- * and the user lands on /dashboard. Incomplete profiles are redirected
+ * and the user lands on /discover. Incomplete profiles are redirected
  * here automatically (see app/dashboard/page.tsx).
  */
 
@@ -79,10 +79,12 @@ function OnboardingFlow() {
     }
   }, [profile]);
 
-  // Already onboarded? No need to be here.
+  // Already onboarded? No need to be here — unless it's an explicit
+  // "Edit profile" visit (/onboarding?edit=1).
   useEffect(() => {
-    if (!profileLoading && profile?.onboarded) {
-      router.replace("/dashboard");
+    const isEdit = window.location.search.includes("edit=1");
+    if (!profileLoading && profile?.onboarded && !isEdit) {
+      router.replace("/discover");
     }
   }, [profile, profileLoading, router]);
 
@@ -173,7 +175,7 @@ function OnboardingFlow() {
         },
         { merge: true }
       );
-      router.replace("/dashboard");
+      router.replace("/discover");
     } catch {
       setError("Could not save your profile. Please try again.");
       setSaving(false);
