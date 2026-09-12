@@ -12,6 +12,9 @@ export const metadata: Metadata = {
   title: "Spark — Modern Dating",
   description:
     "A mobile-first dating web app: swipe, match, and chat in real time.",
+  verification: {
+    google: "90jzlzuUXvUO4kXcaOkKB2BsYn6WO_VQZ4zYcJcwBGA",
+  },
 };
 
 /**
